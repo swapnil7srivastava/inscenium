@@ -13,6 +13,14 @@ Inscenium consists of four core modules:
 - **Inscenium Edge** - Edge delivery system with WebAssembly/WebGPU compositing workers
 - **Inscenium UAOR** - Uncertainty-Aware Occlusion Reasoning: Advanced occlusion and uncertainty modeling
 
+## Quick start
+
+```bash
+./fix_inscenium_env.sh && make smoke
+```
+
+- PyCharm/VSCode interpreter: `.venv-runtime/bin/python`
+
 ## Quick Start
 
 ### Prerequisites

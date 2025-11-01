@@ -61,6 +61,7 @@ all: setup airflow cms ## Start complete local stack
 
 smoke: ## Run smoke test to verify environment setup
 	@echo "Running smoke test..."
+	@[ -f "./.venv-runtime/bin/python" ] || ./fix_inscenium_env.sh
 	@.venv-runtime/bin/python -c "import torch, torchvision, PIL, pydantic, numpy; print(f'Python: {__import__(\"sys\").version.split()[0]}'); print(f'torch: {torch.__version__}'); print(f'torchvision: {torchvision.__version__}'); print(f'Pillow: {PIL.__version__}'); print(f'pydantic: {pydantic.__version__}'); print(f'numpy: {numpy.__version__}')"
 
 fix: ## Run environment fix script
