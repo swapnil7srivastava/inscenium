@@ -131,6 +131,7 @@ def video(
     every_nth: int = typer.Option(1, help="Process every Nth frame"),
     render_overlay: str = typer.Option("yes", help="Render overlay (yes/no)"),
     max_failures: int = typer.Option(100, help="Max decode failures before stop"),
+    max_frames: Optional[int] = typer.Option(None, "--max-frames", help="Max frames to process (alias for decode.max_frames)"),
     pretty: bool = typer.Option(False, "--pretty/--no-pretty", help="Enable pretty output with progress bars"),
     quiet: bool = typer.Option(False, "--quiet", help="Reduce log verbosity"),
     json_logs: bool = typer.Option(False, "--json-logs", help="Force JSON log format"),
@@ -192,6 +193,10 @@ def video(
     config["decode"]["max_failures"] = max_failures
     config["render"]["enable"] = render_overlay.lower() == "yes"
     config["render"]["hud"] = hud.lower() == "yes"
+    
+    # Wire max_frames to decode.max_frames if provided
+    if max_frames is not None:
+        config.setdefault("decode", {})["max_frames"] = max_frames
     
     # Initialize pipeline components
     metrics = Metrics()

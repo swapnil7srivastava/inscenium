@@ -1,0 +1,58 @@
+{
+  "runtime_sec": 40.68131399154663,
+  "counters": {
+    "frames_processed": 60
+  },
+  "avg_fps": 1.4768398542182324,
+  "stage_latencies": {
+    "detection": 0.6702380895614624,
+    "tracking": 6.718635559082032e-05,
+    "uaor": 0.000878306229909261,
+    "sgi_write": 0.00452967087427775,
+    "render": 0.0014035423596700032
+  },
+  "total_frames": 60,
+  "dropped_frames": 0,
+  "detection_failures": 0,
+  "profile": "cpu",
+  "git_sha": "fdf1033d",
+  "input_video": "samples/demo.mp4",
+  "run_id": "20251102_040330",
+  "config": {
+    "profile": "cpu",
+    "decode": {
+      "every_nth": 2,
+      "max_failures": 100,
+      "max_frames": 60
+    },
+    "perception": {
+      "detector": "torchvision_frcnn",
+      "score_threshold": 0.5,
+      "detector_fallback": "stub"
+    },
+    "tracking": {
+      "type": "byte",
+      "max_age": 30,
+      "iou_thresh": 0.3
+    },
+    "uaor": {
+      "enable": true,
+      "blur_kernel": 5,
+      "conf_decay_alpha": 0.15
+    },
+    "render": {
+      "enable": true,
+      "trails": true,
+      "font_scale": 0.5,
+      "hud": false
+    },
+    "export": {
+      "write_overlay_mp4": true,
+      "write_events_jsonl": true,
+      "write_tracks_jsonl": true,
+      "write_metrics_json": true,
+      "write_crops": false,
+      "write_thumbs": true
+    }
+  }
+}

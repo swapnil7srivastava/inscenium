@@ -1,0 +1,11 @@
+{
+  "run_id": "20251102_040330",
+  "profile": "cpu",
+  "input_video": "samples/demo.mp4",
+  "start_time": "2025-11-02T04:03:30.407683",
+  "end_time": "2025-11-02T04:04:11.094611",
+  "duration_sec": 40.686928,
+  "frames_processed": 60,
+  "version": "1.0.0",
+  "git_sha": "fdf1033d"
+}

@@ -4,8 +4,9 @@ decode:
   every_nth: 1
   max_failures: 100
 perception:
-  detector: "torchvision_frcnn"   # fallback: "stub"
+  detector: "torchvision_frcnn"
   score_threshold: 0.5
+  detector_fallback: "stub"
 tracking:
   type: "byte"
   max_age: 30

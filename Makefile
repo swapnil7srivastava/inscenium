@@ -138,10 +138,10 @@ api:
 	@docker compose up -d api
 
 run-video: ## Run video processing demo
-	@poetry run inscenium video --in samples/demo.mp4 --out runs/demo --profile cpu --render yes --every-nth 1
+	@poetry run inscenium video --in samples/demo.mp4 --out runs/demo --profile cpu --render-overlay yes --every-nth 1
 
 ci-quick: ## Quick CI test without rendering
-	@poetry run inscenium video --in samples/demo.mp4 --out runs/ci --profile cpu --render no
+	@poetry run inscenium video --in samples/demo.mp4 --out runs/ci --profile cpu --render-overlay no
 
 report: ## Build HTML report for latest run
 	@python -m inscenium.render.report --runs-dir runs

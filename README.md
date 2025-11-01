@@ -161,6 +161,8 @@ The project includes comprehensive testing:
 
 ## Video Pipeline Quick Start
 
+> On CI/macOS we default to CPU and will fall back to the **stub detector** if torchvision ops aren't available; the pipeline still produces overlays, events, metrics, and the HTML report.
+
 ```bash
 # Setup environment
 ./fix_inscenium_env.sh && make smoke
@@ -169,7 +171,7 @@ The project includes comprehensive testing:
 poetry install -n --only main
 
 # Generate demo video and run pipeline
-poetry run inscenium video --in samples/demo.mp4 --out runs/demo --profile cpu --render yes
+poetry run inscenium video --in samples/demo.mp4 --out runs/demo --profile cpu --render-overlay yes --max-frames 60
 
 # Expected output structure:
 # runs/demo/<timestamp>/

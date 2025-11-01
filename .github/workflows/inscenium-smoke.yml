@@ -9,6 +9,10 @@ on:
 jobs:
   smoke-test:
     runs-on: macos-latest
+    env:
+      INS_LOG_FORMAT: plain
+      CI: true
+      INS_FORCE_CPU: 1
     
     steps:
     - uses: actions/checkout@v4
@@ -21,8 +25,11 @@ jobs:
     - name: Install Poetry
       run: pipx install poetry
     
-    - name: Install deps with Poetry
-      run: poetry install -n --only main --with dev
+    - name: Create/refresh lock (no update)
+      run: poetry lock --no-update --no-cache
+    
+    - name: Install deps (dev included, no root)
+      run: poetry install --no-interaction --with dev --no-root
     
     - name: Cache pip
       uses: actions/cache@v4
@@ -50,14 +57,14 @@ jobs:
     - name: Run tests
       run: make test
     
-    - name: Upload artifacts
+    - name: Upload smoke artifacts
       uses: actions/upload-artifact@v4
-      if: always()
       with:
-        name: inscenium-report
+        name: inscenium-smoke
         path: |
-          runs/*/report.html
           runs/*/overlay.mp4
+          runs/*/report.html
           runs/*/metrics.json
-          runs/*/run.json
-        retention-days: 7
+          runs/*/events.sgi.jsonl
+          runs/**/smoke_versions.txt
+        if-no-files-found: ignore
