@@ -43,7 +43,7 @@ db: ## Set up and seed local database
 
 test: ## Run test suite
 	@echo "Running tests..."
-	@bash ops/scripts/run_tests.sh
+	@poetry run pytest -q
 
 lint: ## Run code linting and formatting
 	@echo "Running linters..."
@@ -136,3 +136,21 @@ profile: ## Run profiling on key components
 api:
 	@echo "[api] Starting API gateway"
 	@docker compose up -d api
+
+run-video: ## Run video processing demo
+	@poetry run inscenium video --in samples/demo.mp4 --out runs/demo --profile cpu --render yes --every-nth 1
+
+ci-quick: ## Quick CI test without rendering
+	@poetry run inscenium video --in samples/demo.mp4 --out runs/ci --profile cpu --render no
+
+report: ## Build HTML report for latest run
+	@python -m inscenium.render.report --runs-dir runs
+
+gallery: ## Build runs index gallery
+	@python -m inscenium.render.report --runs-dir runs --index
+
+fmt: ## Format code via ruff and pre-commit
+	@command -v pre-commit >/dev/null 2>&1 && (pre-commit run -a || (pre-commit install && pre-commit run -a)) || echo "pre-commit not available"
+
+lint-ruff: ## Run ruff linting
+	@poetry run ruff check .

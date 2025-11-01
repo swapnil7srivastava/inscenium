@@ -1,0 +1,27 @@
+---
+profile: "cpu"
+decode:
+  every_nth: 1
+  max_failures: 100
+perception:
+  detector: "torchvision_frcnn"   # fallback: "stub"
+  score_threshold: 0.5
+tracking:
+  type: "byte"
+  max_age: 30
+  iou_thresh: 0.3
+uaor:
+  enable: true
+  blur_kernel: 5
+  conf_decay_alpha: 0.15
+render:
+  enable: true
+  trails: true
+  font_scale: 0.5
+export:
+  write_overlay_mp4: true
+  write_events_jsonl: true
+  write_tracks_jsonl: true
+  write_metrics_json: true
+  write_crops: false
+  write_thumbs: true

@@ -18,6 +18,12 @@ jobs:
       with:
         python-version: '3.11'
     
+    - name: Install Poetry
+      run: pipx install poetry
+    
+    - name: Install deps with Poetry
+      run: poetry install -n --only main --with dev
+    
     - name: Cache pip
       uses: actions/cache@v4
       with:
@@ -26,9 +32,32 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
     
+    - name: Cache Poetry
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pypoetry
+        key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-poetry-
+    
     - name: Make fix script executable and run environment setup
       run: |
         chmod +x fix_inscenium_env.sh && ./fix_inscenium_env.sh
     
     - name: Run smoke test
       run: make smoke
+    
+    - name: Run tests
+      run: make test
+    
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: inscenium-report
+        path: |
+          runs/*/report.html
+          runs/*/overlay.mp4
+          runs/*/metrics.json
+          runs/*/run.json
+        retention-days: 7

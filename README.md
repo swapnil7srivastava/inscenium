@@ -1,5 +1,9 @@
 # Inscenium™
 
+[![CI](https://github.com/inscenium/inscenium/actions/workflows/inscenium-smoke.yml/badge.svg)](https://github.com/inscenium/inscenium/actions/workflows/inscenium-smoke.yml)
+[![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://python.org)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 **Make scenes addressable.**
 
 Inscenium is an advanced computer vision and rendering system for creating contextual ad placement opportunities in video content. The platform combines scene understanding, surface geometry, rights management, and edge delivery to enable precise, unobtrusive advertising integration.
@@ -154,6 +158,48 @@ The project includes comprehensive testing:
 - **Golden Scenes**: Curated test cases with expected outputs
 - **Unit Tests**: Component-level testing
 - **Performance Tests**: PRS metric validation
+
+## Video Pipeline Quick Start
+
+```bash
+# Setup environment
+./fix_inscenium_env.sh && make smoke
+
+# Install main dependencies only
+poetry install -n --only main
+
+# Generate demo video and run pipeline
+poetry run inscenium video --in samples/demo.mp4 --out runs/demo --profile cpu --render yes
+
+# Expected output structure:
+# runs/demo/<timestamp>/
+# ├── overlay.mp4          # Video with tracking overlays
+# ├── events.sgi.jsonl     # Scene Graph Intelligence events
+# ├── tracks.jsonl         # Individual track data  
+# ├── metrics.json         # Pipeline performance metrics
+# ├── thumbs/             # Frame thumbnails
+# └── logs/               # Processing logs
+
+# Example SGI JSONL line:
+# {"ts": 0.033, "frame": 1, "objects": [{"id": 1, "label": "person", "bbox": [100, 50, 80, 120], "conf": 0.85}], "events": [], "uaor": {"occlusion": 0.1, "uncertainty": 0.2}}
+```
+
+## Reports & Gallery
+
+Generate beautiful HTML reports and galleries from your pipeline runs:
+
+```bash
+# Generate report for the latest run
+make report
+
+# Generate gallery index of all runs  
+make gallery
+
+# View reports at runs/<run_id>/report.html
+# View gallery at runs/index.html
+```
+
+Reports include performance metrics, stage latencies with mini sparklines, thumbnail galleries, and links to overlay videos. The gallery provides a consolidated view of all pipeline runs with quick access to reports and videos.
 
 ## Contributing
 

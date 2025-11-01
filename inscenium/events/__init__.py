@@ -1,0 +1,1 @@
+"""Events and SGI writing module."""
