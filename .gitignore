@@ -23,6 +23,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 .venv/
+.venv-runtime/
 venv/
 ENV/
 env/
@@ -110,6 +111,7 @@ Thumbs.db
 data/
 logs/
 *.log
+inscenium_env_fix_*.log
 *.db
 *.sqlite
 *.sqlite3

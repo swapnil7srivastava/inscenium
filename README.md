@@ -103,6 +103,12 @@ make all        # Complete local stack
 - [SGI Schema](docs/specs/sgi_schema_v1.md)
 - [Legal & Compliance](docs/legal/compliance_playbook.md)
 
+## Use in PyCharm/VSCode
+
+For IDE integration, use the `.venv-runtime` environment created by `./fix_inscenium_env.sh`:
+- **PyCharm**: Set Python Interpreter to `.venv-runtime/bin/python`
+- **VSCode**: Select `.venv-runtime/bin/python` as your Python interpreter
+
 ## Environment Configuration
 
 Copy `.env.example` to `.env` and configure:
@@ -113,6 +119,12 @@ INSCENIUM_DATA=./data
 CUDA_ARCH=all
 POSTGRES_DSN=postgresql://inscenium:inscenium@localhost:5432/inscenium
 ```
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PY_VERSION` | Python version to install | `3.11` |
+| `POETRY_HYGIENE` | Clean install without cache | `1` |
+| `FORCE_RECREATE` | Force recreate virtual environment | `1` |
 
 ## Running the CLI
 

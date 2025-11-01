@@ -1,4 +1,4 @@
-.PHONY: help setup python node cuda edge airflow cms db test lint qa golden build all
+.PHONY: help setup python node cuda edge airflow cms db test lint qa golden build all smoke fix clean
 
 help: ## Show this help message
 	@echo "Inscenium Build System"
@@ -59,10 +59,19 @@ build: setup test ## Full build (setup + test)
 
 all: setup airflow cms ## Start complete local stack
 
-clean: ## Clean build artifacts
+smoke: ## Run smoke test to verify environment setup
+	@echo "Running smoke test..."
+	@.venv-runtime/bin/python -c "import torch, torchvision, PIL, pydantic, numpy; print(f'Python: {__import__(\"sys\").version.split()[0]}'); print(f'torch: {torch.__version__}'); print(f'torchvision: {torchvision.__version__}'); print(f'Pillow: {PIL.__version__}'); print(f'pydantic: {pydantic.__version__}'); print(f'numpy: {numpy.__version__}')"
+
+fix: ## Run environment fix script
+	@echo "Running environment fix..."
+	@./fix_inscenium_env.sh
+
+clean: ## Clean build artifacts and runtime environment
 	@echo "Cleaning build artifacts..."
 	@rm -rf build/ dist/ target/ *.egg-info/
 	@rm -rf render/*.so edge/*.wasm control/api/*.exe
+	@rm -rf .venv-runtime inscenium_env_fix_*.log
 	@find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 	@find . -type f -name "*.pyc" -delete 2>/dev/null || true
 
