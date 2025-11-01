@@ -1,0 +1,24 @@
+[package]
+name = "inscenium-edge"
+version = "1.0.0" 
+edition = "2021"
+authors = ["Inscenium Contributors"]
+description = "Edge workers for real-time video compositing"
+
+[[bin]]
+name = "edge_worker_wgpu"
+path = "edge_worker_wgpu.rs"
+
+[[bin]]  
+name = "decision_engine"
+path = "decision_engine.rs"
+
+[dependencies]
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+wgpu = "0.18"
+bytemuck = "1.14"
+
+[workspace]
+members = ["edge_worker_wasm"]

@@ -1,0 +1,348 @@
+// Inscenium API Protocol Buffer Definitions
+// ========================================
+// 
+// This file defines the gRPC service and message types for the Inscenium API.
+// It covers placement opportunities, booking requests, and exposure events.
+
+syntax = "proto3";
+
+package inscenium.api.v1;
+
+option go_package = "github.com/inscenium/inscenium/control/api/pb";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+// Core data types
+// ===============
+
+message Point3D {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+message BoundingBox {
+  Point3D min = 1;
+  Point3D max = 2;
+}
+
+message SurfaceGeometry {
+  repeated Point3D vertices = 1;
+  repeated Point3D normals = 2;
+  repeated float texture_coords = 3;  // UV coordinates (u,v pairs)
+  BoundingBox bounds = 4;
+  float area_square_meters = 5;
+}
+
+message ViewingAngle {
+  float azimuth_degrees = 1;   // Horizontal angle from viewer
+  float elevation_degrees = 2; // Vertical angle from viewer
+  float distance_meters = 3;
+}
+
+message UncertaintyMetrics {
+  float occlusion_probability = 1;    // 0.0 - 1.0
+  float depth_confidence = 2;         // 0.0 - 1.0
+  float tracking_stability = 3;       // 0.0 - 1.0
+  float geometric_consistency = 4;    // 0.0 - 1.0
+}
+
+// Placement-related messages
+// ==========================
+
+message PlacementOpportunity {
+  string surface_id = 1;              // Unique surface identifier
+  string title_id = 2;                // Content title identifier
+  string shot_id = 3;                 // Shot identifier within title
+  
+  // Temporal information
+  google.protobuf.Duration start_time = 4;
+  google.protobuf.Duration end_time = 5;
+  google.protobuf.Duration duration = 6;
+  
+  // Spatial information
+  SurfaceGeometry geometry = 7;
+  ViewingAngle primary_angle = 8;
+  repeated ViewingAngle alternative_angles = 9;
+  
+  // Quality metrics
+  float prs_score = 10;               // Placement Readiness Score (0-100)
+  float visibility_score = 11;        // Average visibility (0-100)
+  UncertaintyMetrics uncertainty = 12;
+  
+  // Constraints and metadata
+  repeated string surface_types = 13;  // e.g., "wall", "table", "screen"
+  repeated string restrictions = 14;   // Legal/creative restrictions
+  map<string, string> metadata = 15;  // Additional key-value pairs
+  
+  // Created/updated timestamps
+  google.protobuf.Timestamp created_at = 16;
+  google.protobuf.Timestamp updated_at = 17;
+}
+
+message CreativeAsset {
+  string asset_id = 1;
+  string asset_url = 2;
+  string mime_type = 3;
+  int64 size_bytes = 4;
+  
+  // Dimensions
+  int32 width_pixels = 5;
+  int32 height_pixels = 6;
+  google.protobuf.Duration duration = 7; // For video assets
+  
+  // Adaptation requirements
+  bool supports_perspective_correction = 8;
+  bool supports_lighting_adaptation = 9;
+  repeated string supported_formats = 10;
+  
+  map<string, string> metadata = 11;
+}
+
+message BookPlacementRequest {
+  string placement_id = 1;            // References PlacementOpportunity
+  string advertiser_id = 2;
+  string campaign_id = 3;
+  CreativeAsset creative = 4;
+  
+  // Booking details
+  google.protobuf.Timestamp start_time = 5;
+  google.protobuf.Timestamp end_time = 6;
+  int32 max_impressions = 7;
+  float bid_amount_cpm = 8;           // Cost per mille
+  
+  // Targeting and constraints
+  repeated string target_demographics = 9;
+  repeated string geographic_restrictions = 10;
+  repeated string content_categories = 11;
+  
+  // Technical requirements
+  float min_prs_score = 12;
+  float min_visibility_duration_seconds = 13;
+  bool require_perspective_correction = 14;
+  bool require_lighting_adaptation = 15;
+  
+  map<string, string> metadata = 16;
+}
+
+message BookPlacementResponse {
+  string booking_id = 1;
+  PlacementStatus status = 2;
+  string message = 3;
+  
+  // If successful
+  google.protobuf.Timestamp confirmation_time = 4;
+  float final_cpm_rate = 5;
+  int32 estimated_impressions = 6;
+  
+  // Asset processing
+  string sidecar_manifest_url = 7;    // HLS sidecar assets
+  repeated string preview_urls = 8;    // Preview renderings
+}
+
+enum PlacementStatus {
+  PLACEMENT_STATUS_UNKNOWN = 0;
+  PLACEMENT_STATUS_PENDING = 1;
+  PLACEMENT_STATUS_CONFIRMED = 2;
+  PLACEMENT_STATUS_PROCESSING = 3;
+  PLACEMENT_STATUS_ACTIVE = 4;
+  PLACEMENT_STATUS_REJECTED = 5;
+  PLACEMENT_STATUS_EXPIRED = 6;
+  PLACEMENT_STATUS_CANCELLED = 7;
+}
+
+// Exposure and measurement messages
+// ================================
+
+message ExposureEvent {
+  string event_id = 1;
+  string booking_id = 2;
+  string viewer_id = 3;                // Anonymous viewer identifier
+  
+  // Temporal information
+  google.protobuf.Timestamp timestamp = 4;
+  google.protobuf.Duration exposure_duration = 5;
+  google.protobuf.Duration content_position = 6; // Position within content
+  
+  // Viewing context
+  ViewingAngle viewing_angle = 7;
+  float screen_coverage_percentage = 8; // How much of screen was covered
+  float attention_score = 9;           // Eye tracking/engagement score (0-1)
+  
+  // Quality metrics at time of exposure
+  float instantaneous_prs = 10;
+  UncertaintyMetrics real_time_uncertainty = 11;
+  
+  // Device and environment
+  string device_type = 12;             // "mobile", "desktop", "tv", etc.
+  string player_version = 13;
+  map<string, string> environment_metadata = 14;
+  
+  // Privacy and compliance
+  bool consent_given = 15;
+  string jurisdiction = 16;            // ISO country code
+  repeated string privacy_flags = 17;   // GDPR, CCPA, etc.
+}
+
+message AggregateMetrics {
+  string booking_id = 1;
+  google.protobuf.Timestamp period_start = 2;
+  google.protobuf.Timestamp period_end = 3;
+  
+  // Exposure metrics
+  int64 total_impressions = 4;
+  int64 unique_viewers = 5;
+  google.protobuf.Duration total_exposure_time = 6;
+  google.protobuf.Duration average_exposure_time = 7;
+  
+  // Quality metrics
+  float average_prs_score = 8;
+  float average_attention_score = 9;
+  float average_screen_coverage = 10;
+  
+  // Performance percentiles
+  repeated float prs_percentiles = 11;    // P50, P90, P95, P99
+  repeated float attention_percentiles = 12;
+  repeated float coverage_percentiles = 13;
+  
+  // Geographic and demographic breakdowns
+  map<string, int64> impressions_by_region = 14;
+  map<string, int64> impressions_by_device = 15;
+  map<string, float> average_scores_by_demographic = 16;
+}
+
+// API service definitions
+// =======================
+
+service InsceniumPlacementService {
+  // Query available placement opportunities
+  rpc ListPlacementOpportunities(ListPlacementOpportunitiesRequest) 
+      returns (ListPlacementOpportunitiesResponse);
+  
+  rpc GetPlacementOpportunity(GetPlacementOpportunityRequest) 
+      returns (PlacementOpportunity);
+  
+  // Book and manage placements
+  rpc BookPlacement(BookPlacementRequest) returns (BookPlacementResponse);
+  
+  rpc GetBookingStatus(GetBookingStatusRequest) returns (BookPlacementResponse);
+  
+  rpc CancelBooking(CancelBookingRequest) returns (CancelBookingResponse);
+  
+  // Real-time updates
+  rpc StreamPlacementUpdates(StreamPlacementUpdatesRequest) 
+      returns (stream PlacementOpportunity);
+}
+
+service InsceniumMeasurementService {
+  // Record exposure events
+  rpc RecordExposure(ExposureEvent) returns (RecordExposureResponse);
+  
+  rpc BatchRecordExposures(BatchRecordExposuresRequest) 
+      returns (BatchRecordExposuresResponse);
+  
+  // Retrieve measurement data
+  rpc GetAggregateMetrics(GetAggregateMetricsRequest) 
+      returns (AggregateMetrics);
+  
+  rpc GetExposureEvents(GetExposureEventsRequest) 
+      returns (GetExposureEventsResponse);
+  
+  // Real-time metrics
+  rpc StreamMetrics(StreamMetricsRequest) returns (stream AggregateMetrics);
+}
+
+// Request/Response message types
+// =============================
+
+message ListPlacementOpportunitiesRequest {
+  string title_id = 1;
+  float min_prs_score = 2;
+  float min_duration_seconds = 3;
+  repeated string surface_types = 4;
+  repeated string required_capabilities = 5;
+  
+  // Pagination
+  int32 page_size = 6;
+  string page_token = 7;
+  
+  // Filtering
+  map<string, string> filters = 8;
+}
+
+message ListPlacementOpportunitiesResponse {
+  repeated PlacementOpportunity opportunities = 1;
+  string next_page_token = 2;
+  int32 total_count = 3;
+}
+
+message GetPlacementOpportunityRequest {
+  string surface_id = 1;
+}
+
+message GetBookingStatusRequest {
+  string booking_id = 1;
+}
+
+message CancelBookingRequest {
+  string booking_id = 1;
+  string reason = 2;
+}
+
+message CancelBookingResponse {
+  bool success = 1;
+  string message = 2;
+  google.protobuf.Timestamp cancelled_at = 3;
+}
+
+message StreamPlacementUpdatesRequest {
+  repeated string title_ids = 1;
+  float min_prs_threshold = 2;
+}
+
+message RecordExposureResponse {
+  bool success = 1;
+  string message = 2;
+  string event_id = 3;
+}
+
+message BatchRecordExposuresRequest {
+  repeated ExposureEvent events = 1;
+}
+
+message BatchRecordExposuresResponse {
+  int32 processed_count = 1;
+  int32 failed_count = 2;
+  repeated string failed_event_ids = 3;
+  repeated string error_messages = 4;
+}
+
+message GetAggregateMetricsRequest {
+  string booking_id = 1;
+  google.protobuf.Timestamp start_time = 2;
+  google.protobuf.Timestamp end_time = 3;
+  string granularity = 4;              // "hour", "day", "week"
+  repeated string group_by = 5;        // "region", "device", "demographic"
+}
+
+message GetExposureEventsRequest {
+  string booking_id = 1;
+  google.protobuf.Timestamp start_time = 2;
+  google.protobuf.Timestamp end_time = 3;
+  
+  // Pagination
+  int32 page_size = 4;
+  string page_token = 5;
+}
+
+message GetExposureEventsResponse {
+  repeated ExposureEvent events = 1;
+  string next_page_token = 2;
+  int32 total_count = 3;
+}
+
+message StreamMetricsRequest {
+  repeated string booking_ids = 1;
+  string aggregation_window = 2;       // "1m", "5m", "15m", "1h"
+}

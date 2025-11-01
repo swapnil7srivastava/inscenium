@@ -1,0 +1,512 @@
+# Inscenium API OpenAPI 3.0 Specification
+# ========================================
+
+openapi: 3.0.3
+info:
+  title: Inscenium API
+  description: |
+    Inscenium API for managing video placement opportunities, booking placements,
+    and tracking exposure events. The API provides endpoints for Scene Graph Intelligence (SGI),
+    Placement Readiness Scoring (PRS), and real-time analytics.
+    
+    ## Authentication
+    
+    All endpoints except `/health` require Bearer token authentication.
+    
+    ## Rate Limiting
+    
+    API requests are rate-limited to 1000 requests per minute per client.
+  version: 1.0.0
+  contact:
+    name: Inscenium API Support
+    email: api-support@inscenium.dev
+    url: https://docs.inscenium.dev
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development
+  - url: https://api.inscenium.dev/v1
+    description: Production
+
+security:
+  - BearerAuth: []
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Check API health status
+      operationId: getHealth
+      security: []
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+                
+  /sgi/opportunities:
+    get:
+      summary: List placement opportunities
+      description: Get available placement opportunities with filtering
+      operationId: listOpportunities
+      parameters:
+        - name: title_id
+          in: query
+          description: Filter by title ID
+          schema:
+            type: string
+        - name: min_prs
+          in: query
+          description: Minimum PRS score
+          schema:
+            type: number
+            minimum: 0
+            maximum: 100
+        - name: surface_type
+          in: query
+          description: Filter by surface type
+          schema:
+            type: string
+            enum: [wall, table, screen, floor, billboard]
+        - name: limit
+          in: query
+          description: Maximum number of results
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: offset
+          in: query
+          description: Number of results to skip
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: List of placement opportunities
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpportunitiesResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /sgi/opportunities/{surface_id}:
+    get:
+      summary: Get placement opportunity
+      description: Get detailed information about a specific placement opportunity
+      operationId: getOpportunity
+      parameters:
+        - name: surface_id
+          in: path
+          required: true
+          description: Unique surface identifier
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Placement opportunity details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlacementOpportunity'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /placements/book:
+    post:
+      summary: Book a placement
+      description: Book a placement opportunity for an advertising campaign
+      operationId: bookPlacement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookPlacementRequest'
+      responses:
+        '201':
+          description: Placement booked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookPlacementResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Placement no longer available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /placements/{booking_id}:
+    get:
+      summary: Get booking status
+      description: Get the status and details of a placement booking
+      operationId: getBooking
+      parameters:
+        - name: booking_id
+          in: path
+          required: true
+          description: Unique booking identifier
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Booking details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookPlacementResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+          
+    delete:
+      summary: Cancel booking
+      description: Cancel a placement booking
+      operationId: cancelBooking
+      parameters:
+        - name: booking_id
+          in: path
+          required: true
+          description: Unique booking identifier
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Booking cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancelBookingResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /events/exposure:
+    post:
+      summary: Record exposure event
+      description: Record a single viewer exposure event
+      operationId: recordExposure
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExposureEvent'
+      responses:
+        '201':
+          description: Exposure recorded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordExposureResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /events/exposure/batch:
+    post:
+      summary: Record multiple exposure events
+      description: Record multiple viewer exposure events in a batch
+      operationId: batchRecordExposures
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchExposureRequest'
+      responses:
+        '201':
+          description: Batch processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchRecordExposureResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        service:
+          type: string
+          example: inscenium-api-gateway
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+          example: 1.0.0
+          
+    PlacementOpportunity:
+      type: object
+      properties:
+        surface_id:
+          type: string
+          description: Unique surface identifier
+          example: surface_001
+        title_id:
+          type: string
+          description: Content title identifier
+        shot_id:
+          type: string
+          description: Shot identifier within title
+        start_time:
+          type: number
+          description: Start time in seconds
+          example: 5.2
+        end_time:
+          type: number
+          description: End time in seconds
+          example: 12.8
+        duration:
+          type: number
+          description: Duration in seconds
+          example: 7.6
+        prs_score:
+          type: number
+          description: Placement Readiness Score (0-100)
+          minimum: 0
+          maximum: 100
+          example: 87.5
+        surface_type:
+          type: string
+          enum: [wall, table, screen, floor, billboard]
+          example: wall
+        geometry:
+          $ref: '#/components/schemas/SurfaceGeometry'
+        restrictions:
+          type: array
+          items:
+            type: string
+          example: ["no-alcohol", "family-friendly"]
+        created_at:
+          type: string
+          format: date-time
+          
+    SurfaceGeometry:
+      type: object
+      properties:
+        area_pixels:
+          type: number
+          description: Surface area in pixels
+        area_world_m2:
+          type: number
+          description: Estimated real-world area in square meters
+        bounds_3d:
+          type: object
+          description: 3D bounding box coordinates
+          
+    BookPlacementRequest:
+      type: object
+      required:
+        - surface_id
+        - advertiser_id
+        - campaign_id
+        - bid_amount_cpm
+      properties:
+        surface_id:
+          type: string
+          description: Surface to book
+        advertiser_id:
+          type: string
+          description: Advertiser identifier
+        campaign_id:
+          type: string
+          description: Campaign identifier
+        creative_asset_url:
+          type: string
+          format: uri
+          description: URL to creative asset
+        bid_amount_cpm:
+          type: number
+          description: Bid amount per thousand impressions
+          minimum: 0
+        max_impressions:
+          type: integer
+          description: Maximum number of impressions
+          minimum: 1
+        target_demographics:
+          type: array
+          items:
+            type: string
+          description: Target demographic segments
+          
+    BookPlacementResponse:
+      type: object
+      properties:
+        booking_id:
+          type: string
+          description: Unique booking identifier
+        status:
+          type: string
+          enum: [pending, confirmed, active, completed, cancelled]
+        message:
+          type: string
+          description: Status message
+        confirmation_time:
+          type: string
+          format: date-time
+        final_cpm_rate:
+          type: number
+          description: Final CPM rate
+        estimated_impressions:
+          type: integer
+          description: Estimated impressions
+          
+    CancelBookingResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        cancelled_at:
+          type: string
+          format: date-time
+          
+    ExposureEvent:
+      type: object
+      required:
+        - booking_id
+        - viewer_id
+        - exposure_duration
+      properties:
+        booking_id:
+          type: string
+          description: Related booking ID
+        viewer_id:
+          type: string
+          description: Anonymous viewer identifier
+        exposure_duration:
+          type: number
+          description: Exposure duration in seconds
+          minimum: 0
+        screen_coverage:
+          type: number
+          description: Screen coverage percentage
+          minimum: 0
+          maximum: 100
+        attention_score:
+          type: number
+          description: Attention score (0-1)
+          minimum: 0
+          maximum: 1
+        device_type:
+          type: string
+          enum: [mobile, tablet, desktop, tv]
+        timestamp:
+          type: string
+          format: date-time
+          
+    RecordExposureResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        event_id:
+          type: string
+        message:
+          type: string
+          
+    BatchExposureRequest:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExposureEvent'
+          maxItems: 1000
+          
+    BatchRecordExposureResponse:
+      type: object
+      properties:
+        processed_count:
+          type: integer
+        failed_count:
+          type: integer
+        failed_event_ids:
+          type: array
+          items:
+            type: string
+            
+    OpportunitiesResponse:
+      type: object
+      properties:
+        opportunities:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlacementOpportunity'
+        total_count:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+          
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        code:
+          type: string
+          description: Error code
+        timestamp:
+          type: string
+          format: date-time
+          
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+            
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+            
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

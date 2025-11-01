@@ -1,0 +1,318 @@
+{
+  "test_suite_version": "1.0.0",
+  "tolerance": 2.0,
+  "description": "Expected PRS scores and quality metrics for golden scene validation",
+  "last_updated": "2024-01-15T12:00:00Z",
+  "expectations": [
+    {
+      "scene_id": "scene_001",
+      "scene_title": "Interior Wall Placement Test",
+      "expected_surfaces": [
+        {
+          "surface_id": "wall_primary", 
+          "surface_type": "wall",
+          "expected_prs": 87.5,
+          "prs_components": {
+            "technical_score": 85.2,
+            "visibility_score": 90.1,
+            "temporal_score": 89.3,
+            "spatial_score": 88.7,
+            "brand_safety_score": 95.0
+          },
+          "quality_attributes": {
+            "planarity": 0.92,
+            "area_m2": 6.8,
+            "visibility_ratio": 0.88,
+            "duration_seconds": 5.0,
+            "occlusion_ratio": 0.05
+          }
+        },
+        {
+          "surface_id": "wall_secondary",
+          "surface_type": "wall", 
+          "expected_prs": 82.3,
+          "prs_components": {
+            "technical_score": 80.1,
+            "visibility_score": 85.4,
+            "temporal_score": 83.7,
+            "spatial_score": 82.9,
+            "brand_safety_score": 95.0
+          },
+          "quality_attributes": {
+            "planarity": 0.89,
+            "area_m2": 4.2,
+            "visibility_ratio": 0.82,
+            "duration_seconds": 4.8,
+            "occlusion_ratio": 0.12
+          }
+        }
+      ],
+      "scene_metrics": {
+        "avg_prs": 84.9,
+        "surface_count": 2,
+        "high_quality_surfaces": 2,
+        "total_placement_area": 11.0
+      }
+    },
+    {
+      "scene_id": "scene_002",
+      "scene_title": "Product Table Placement Test",
+      "expected_surfaces": [
+        {
+          "surface_id": "table_primary",
+          "surface_type": "table",
+          "expected_prs": 93.2,
+          "prs_components": {
+            "technical_score": 91.8,
+            "visibility_score": 95.6,
+            "temporal_score": 94.1,
+            "spatial_score": 93.7,
+            "brand_safety_score": 98.0
+          },
+          "quality_attributes": {
+            "planarity": 0.96,
+            "area_m2": 1.8,
+            "visibility_ratio": 0.94,
+            "duration_seconds": 3.2,
+            "occlusion_ratio": 0.02
+          }
+        }
+      ],
+      "scene_metrics": {
+        "avg_prs": 93.2,
+        "surface_count": 1, 
+        "high_quality_surfaces": 1,
+        "total_placement_area": 1.8
+      }
+    },
+    {
+      "scene_id": "scene_003",
+      "scene_title": "Complex Motion Scene Test",
+      "expected_surfaces": [
+        {
+          "surface_id": "wall_motion",
+          "surface_type": "wall",
+          "expected_prs": 72.4,
+          "prs_components": {
+            "technical_score": 75.3,
+            "visibility_score": 78.1,
+            "temporal_score": 68.2,
+            "spatial_score": 74.6,
+            "brand_safety_score": 90.0
+          },
+          "quality_attributes": {
+            "planarity": 0.85,
+            "area_m2": 5.2,
+            "visibility_ratio": 0.72,
+            "duration_seconds": 6.5,
+            "occlusion_ratio": 0.25
+          }
+        },
+        {
+          "surface_id": "table_motion", 
+          "surface_type": "table",
+          "expected_prs": 68.9,
+          "prs_components": {
+            "technical_score": 70.1,
+            "visibility_score": 73.2,
+            "temporal_score": 65.4,
+            "spatial_score": 71.8,
+            "brand_safety_score": 90.0
+          },
+          "quality_attributes": {
+            "planarity": 0.81,
+            "area_m2": 2.1,
+            "visibility_ratio": 0.68,
+            "duration_seconds": 5.8,
+            "occlusion_ratio": 0.31
+          }
+        },
+        {
+          "surface_id": "wall_background",
+          "surface_type": "wall",
+          "expected_prs": 65.7,
+          "prs_components": {
+            "technical_score": 67.8,
+            "visibility_score": 69.4,
+            "temporal_score": 62.1,
+            "spatial_score": 68.2,
+            "brand_safety_score": 90.0
+          },
+          "quality_attributes": {
+            "planarity": 0.79,
+            "area_m2": 3.8,
+            "visibility_ratio": 0.61,
+            "duration_seconds": 7.2,
+            "occlusion_ratio": 0.38
+          }
+        }
+      ],
+      "scene_metrics": {
+        "avg_prs": 69.0,
+        "surface_count": 3,
+        "high_quality_surfaces": 0,
+        "total_placement_area": 11.1
+      }
+    },
+    {
+      "scene_id": "scene_004", 
+      "scene_title": "Outdoor Billboard Test",
+      "expected_surfaces": [
+        {
+          "surface_id": "billboard_main",
+          "surface_type": "billboard",
+          "expected_prs": 94.8,
+          "prs_components": {
+            "technical_score": 93.1,
+            "visibility_score": 97.2,
+            "temporal_score": 95.6,
+            "spatial_score": 94.9,
+            "brand_safety_score": 92.0
+          },
+          "quality_attributes": {
+            "planarity": 0.97,
+            "area_m2": 24.6,
+            "visibility_ratio": 0.95,
+            "duration_seconds": 6.5,
+            "occlusion_ratio": 0.01
+          }
+        }
+      ],
+      "scene_metrics": {
+        "avg_prs": 94.8,
+        "surface_count": 1,
+        "high_quality_surfaces": 1,
+        "total_placement_area": 24.6
+      }
+    },
+    {
+      "scene_id": "scene_005",
+      "scene_title": "Multi-Screen Environment Test", 
+      "expected_surfaces": [
+        {
+          "surface_id": "screen_large",
+          "surface_type": "screen",
+          "expected_prs": 89.3,
+          "prs_components": {
+            "technical_score": 87.9,
+            "visibility_score": 91.4,
+            "temporal_score": 90.2,
+            "spatial_score": 89.7,
+            "brand_safety_score": 96.0
+          },
+          "quality_attributes": {
+            "planarity": 0.98,
+            "area_m2": 3.2,
+            "visibility_ratio": 0.89,
+            "duration_seconds": 4.8,
+            "occlusion_ratio": 0.03
+          }
+        },
+        {
+          "surface_id": "screen_medium_1",
+          "surface_type": "screen",
+          "expected_prs": 84.7,
+          "prs_components": {
+            "technical_score": 82.4,
+            "visibility_score": 87.1,
+            "temporal_score": 85.3,
+            "spatial_score": 84.9,
+            "brand_safety_score": 96.0
+          },
+          "quality_attributes": {
+            "planarity": 0.96,
+            "area_m2": 1.8,
+            "visibility_ratio": 0.84,
+            "duration_seconds": 4.6,
+            "occlusion_ratio": 0.08
+          }
+        },
+        {
+          "surface_id": "screen_medium_2",
+          "surface_type": "screen",
+          "expected_prs": 81.2,
+          "prs_components": {
+            "technical_score": 79.6,
+            "visibility_score": 83.8,
+            "temporal_score": 82.1,
+            "spatial_score": 81.7,
+            "brand_safety_score": 96.0
+          },
+          "quality_attributes": {
+            "planarity": 0.94,
+            "area_m2": 1.5,
+            "visibility_ratio": 0.80,
+            "duration_seconds": 4.3,
+            "occlusion_ratio": 0.11
+          }
+        },
+        {
+          "surface_id": "screen_small",
+          "surface_type": "screen", 
+          "expected_prs": 76.4,
+          "prs_components": {
+            "technical_score": 74.8,
+            "visibility_score": 78.9,
+            "temporal_score": 77.1,
+            "spatial_score": 76.8,
+            "brand_safety_score": 96.0
+          },
+          "quality_attributes": {
+            "planarity": 0.91,
+            "area_m2": 0.8,
+            "visibility_ratio": 0.74,
+            "duration_seconds": 4.1,
+            "occlusion_ratio": 0.18
+          }
+        }
+      ],
+      "scene_metrics": {
+        "avg_prs": 82.9,
+        "surface_count": 4,
+        "high_quality_surfaces": 3,
+        "total_placement_area": 7.3
+      }
+    }
+  ],
+  "global_expectations": {
+    "overall_avg_prs": 84.96,
+    "total_surfaces_expected": 11,
+    "high_quality_surfaces_expected": 7,
+    "surface_type_distribution": {
+      "wall": 4,
+      "table": 2,
+      "billboard": 1,
+      "screen": 4
+    },
+    "prs_distribution": {
+      "excellent_90_plus": 3,
+      "good_80_89": 4,
+      "acceptable_70_79": 2,
+      "marginal_60_69": 2,
+      "poor_below_60": 0
+    }
+  },
+  "validation_rules": {
+    "prs_tolerance": 2.0,
+    "component_tolerance": 3.0,
+    "surface_count_tolerance": 1,
+    "area_tolerance_percent": 10.0,
+    "duration_tolerance_seconds": 0.5,
+    "require_all_surfaces": false,
+    "allow_extra_surfaces": true,
+    "min_surfaces_per_scene": 1
+  },
+  "quality_thresholds": {
+    "excellent": 90.0,
+    "good": 80.0,
+    "acceptable": 70.0,
+    "marginal": 60.0,
+    "minimum_viable": 50.0
+  },
+  "regression_detection": {
+    "alert_prs_drop": 5.0,
+    "alert_surface_count_change": 2,
+    "alert_component_variance": 10.0,
+    "historical_baseline_window": 30
+  }
+}

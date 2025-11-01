@@ -1,0 +1,249 @@
+# Inscenium Docker Compose Configuration
+# =====================================
+# Complete development and production environment for Inscenium
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: inscenium-postgres
+    environment:
+      POSTGRES_DB: inscenium
+      POSTGRES_USER: inscenium
+      POSTGRES_PASSWORD: inscenium
+      POSTGRES_INITDB_ARGS: --encoding=UTF-8 --locale=C
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sgi/sgi_schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inscenium -d inscenium"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Zookeeper for Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: inscenium-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_logs:/var/lib/zookeeper/log
+    restart: unless-stopped
+
+  # Kafka Message Broker
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: inscenium-kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_HOST://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_DELETE_TOPIC_ENABLE: 'true'
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # API Gateway (Go)
+  api:
+    build:
+      context: .
+      dockerfile: ops/docker/api.Dockerfile
+    container_name: inscenium-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    environment:
+      - API_PORT=8080
+      - POSTGRES_DSN=postgresql://inscenium:inscenium@postgres:5432/inscenium
+      - REDIS_URL=redis://redis:6379/0
+      - KAFKA_BROKERS=kafka:29092
+      - JWT_SECRET=${JWT_SECRET:-dev-secret-key}
+      - LOG_LEVEL=${INSCENIUM_LOG_LEVEL:-INFO}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+      - ./sidecar_assets:/app/sidecar_assets
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # CMS Web Application (Next.js)
+  cms:
+    build:
+      context: .
+      dockerfile: ops/docker/cms.Dockerfile
+    container_name: inscenium-cms
+    depends_on:
+      - api
+    environment:
+      - NEXT_PUBLIC_API_BASE=http://localhost:8080
+      - NODE_ENV=production
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./control/cms/webapp/.env.local:/app/.env.local
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Airflow (Data Pipeline)
+  airflow:
+    build:
+      context: .
+      dockerfile: ops/docker/airflow.Dockerfile
+    container_name: inscenium-airflow
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql://inscenium:inscenium@postgres:5432/inscenium
+      - AIRFLOW__CORE__DAGS_FOLDER=/app/ops/pipelines
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - AIRFLOW__WEBSERVER__WEB_SERVER_PORT=8081
+      - AIRFLOW__CORE__FERNET_KEY=${AIRFLOW_FERNET_KEY:-ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg=}
+      - AIRFLOW_ADMIN_USER=${AIRFLOW_ADMIN_USER:-admin}
+      - AIRFLOW_ADMIN_PASSWORD=${AIRFLOW_ADMIN_PASSWORD:-admin}
+      - AIRFLOW_ADMIN_EMAIL=${AIRFLOW_ADMIN_EMAIL:-admin@inscenium.dev}
+      - PYTHONPATH=/app
+      - MOCK_ML_MODELS=true
+      - INSCENIUM_DATA=/app/data
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./ops/pipelines:/app/ops/pipelines
+      - ./data:/app/data
+      - ./perception:/app/perception
+      - ./sgi:/app/sgi
+      - ./render:/app/render
+      - ./measure:/app/measure
+      - airflow_logs:/app/logs
+    command: >
+      bash -c "
+        airflow db init &&
+        airflow users create --role Admin --username admin --email admin@inscenium.dev --firstname Admin --lastname User --password admin &&
+        airflow webserver --port 8081 &
+        airflow scheduler
+      "
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  # CUDA Render Service
+  render:
+    build:
+      context: .
+      dockerfile: ops/docker/render-cuda.Dockerfile
+    container_name: inscenium-render
+    runtime: nvidia  # Requires nvidia-docker
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - CUDA_VISIBLE_DEVICES=0
+      - INSCENIUM_DATA=/app/data
+      - MOCK_ML_MODELS=${MOCK_ML_MODELS:-true}
+    volumes:
+      - ./data:/app/data
+      - ./sidecar_assets:/app/sidecar_assets
+      - ./render:/app/render
+    ports:
+      - "8082:8082"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    profiles:
+      - gpu  # Only start with --profile gpu
+    restart: unless-stopped
+
+  # Edge Worker Service
+  edge:
+    build:
+      context: .
+      dockerfile: ops/docker/edge.Dockerfile
+    container_name: inscenium-edge
+    environment:
+      - RUST_LOG=info
+      - EDGE_WORKER_PORT=8083
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./data:/app/data
+      - ./sidecar_assets:/app/sidecar_assets
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8083/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Redis (Caching)
+  redis:
+    image: redis:7-alpine
+    container_name: inscenium-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  kafka_data:
+    driver: local
+  zookeeper_data:
+    driver: local
+  zookeeper_logs:
+    driver: local
+  redis_data:
+    driver: local
+  airflow_logs:
+    driver: local
+
+networks:
+  default:
+    name: inscenium-network

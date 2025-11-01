@@ -1,0 +1,25 @@
+Inscenium Golden Scene Assets
+=============================
+
+Place your test video files in this directory for golden scene testing.
+
+Recommended test assets:
+- sample.mp4 (2-5 minute video with clear placement opportunities)
+- trailer.mp4 (movie trailer with various shots)
+- sports.mp4 (sports content with dynamic scenes)
+- product_demo.mp4 (static product shots)
+
+Video requirements:
+- Format: MP4 (H.264 video, AAC audio)
+- Resolution: 1920x1080 or higher
+- Duration: 30 seconds to 10 minutes
+- Frame rate: 24fps, 30fps, or 60fps
+- Content should include clear surfaces suitable for placement
+
+The test suite will automatically use mock/stub implementations
+when video files are not present, ensuring CI/CD compatibility.
+
+For actual testing with ML models:
+1. Set MOCK_ML_MODELS=false in your environment
+2. Ensure all required models are downloaded
+3. Run: make golden

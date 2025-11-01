@@ -1,0 +1,205 @@
+# Inscenium Git Attributes Configuration
+# =====================================
+# 
+# Defines how Git handles different file types for:
+# - Line ending normalization
+# - Git LFS (Large File Storage) for media assets
+# - Binary file detection
+# - Language detection overrides
+
+# Default line ending normalization
+* text=auto
+
+# Source code files - force LF line endings
+*.py text eol=lf
+*.rs text eol=lf
+*.go text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+*.proto text eol=lf
+*.sql text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.sh text eol=lf
+*.dockerfile text eol=lf
+Dockerfile* text eol=lf
+Makefile text eol=lf
+*.wgsl text eol=lf
+*.cu text eol=lf
+*.cuh text eol=lf
+
+# Configuration files
+*.conf text eol=lf
+*.ini text eol=lf
+*.cfg text eol=lf
+*.env text eol=lf
+*.env.* text eol=lf
+
+# Web assets
+*.html text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.sass text eol=lf
+*.less text eol=lf
+*.svg text eol=lf
+*.xml text eol=lf
+
+# Git LFS - Large File Storage for media assets
+# ============================================
+
+# Video files (test scenes and samples)
+*.mp4 filter=lfs diff=lfs merge=lfs -text
+*.mov filter=lfs diff=lfs merge=lfs -text
+*.avi filter=lfs diff=lfs merge=lfs -text
+*.mkv filter=lfs diff=lfs merge=lfs -text
+*.webm filter=lfs diff=lfs merge=lfs -text
+*.m4v filter=lfs diff=lfs merge=lfs -text
+*.3gp filter=lfs diff=lfs merge=lfs -text
+
+# Image files (reference frames, test data)
+*.jpg filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
+*.gif filter=lfs diff=lfs merge=lfs -text
+*.bmp filter=lfs diff=lfs merge=lfs -text
+*.tiff filter=lfs diff=lfs merge=lfs -text
+*.tga filter=lfs diff=lfs merge=lfs -text
+*.webp filter=lfs diff=lfs merge=lfs -text
+*.exr filter=lfs diff=lfs merge=lfs -text
+*.hdr filter=lfs diff=lfs merge=lfs -text
+*.ico filter=lfs diff=lfs merge=lfs -text
+
+# 3D models and depth maps
+*.obj filter=lfs diff=lfs merge=lfs -text
+*.fbx filter=lfs diff=lfs merge=lfs -text
+*.dae filter=lfs diff=lfs merge=lfs -text
+*.blend filter=lfs diff=lfs merge=lfs -text
+*.3ds filter=lfs diff=lfs merge=lfs -text
+*.ply filter=lfs diff=lfs merge=lfs -text
+*.stl filter=lfs diff=lfs merge=lfs -text
+
+# Audio files (for video assets)
+*.wav filter=lfs diff=lfs merge=lfs -text
+*.mp3 filter=lfs diff=lfs merge=lfs -text
+*.aac filter=lfs diff=lfs merge=lfs -text
+*.flac filter=lfs diff=lfs merge=lfs -text
+*.ogg filter=lfs diff=lfs merge=lfs -text
+*.m4a filter=lfs diff=lfs merge=lfs -text
+
+# Archive files (datasets, models)
+*.zip filter=lfs diff=lfs merge=lfs -text
+*.tar filter=lfs diff=lfs merge=lfs -text
+*.tar.gz filter=lfs diff=lfs merge=lfs -text
+*.tar.bz2 filter=lfs diff=lfs merge=lfs -text
+*.tar.xz filter=lfs diff=lfs merge=lfs -text
+*.tgz filter=lfs diff=lfs merge=lfs -text
+*.7z filter=lfs diff=lfs merge=lfs -text
+*.rar filter=lfs diff=lfs merge=lfs -text
+
+# Machine learning models and datasets
+*.h5 filter=lfs diff=lfs merge=lfs -text
+*.hdf5 filter=lfs diff=lfs merge=lfs -text
+*.pkl filter=lfs diff=lfs merge=lfs -text
+*.pickle filter=lfs diff=lfs merge=lfs -text
+*.pt filter=lfs diff=lfs merge=lfs -text
+*.pth filter=lfs diff=lfs merge=lfs -text
+*.onnx filter=lfs diff=lfs merge=lfs -text
+*.pb filter=lfs diff=lfs merge=lfs -text
+*.tflite filter=lfs diff=lfs merge=lfs -text
+*.safetensors filter=lfs diff=lfs merge=lfs -text
+*.weights filter=lfs diff=lfs merge=lfs -text
+*.model filter=lfs diff=lfs merge=lfs -text
+*.joblib filter=lfs diff=lfs merge=lfs -text
+
+# Database dumps and large data files
+*.sql.gz filter=lfs diff=lfs merge=lfs -text
+*.dump filter=lfs diff=lfs merge=lfs -text
+*.db filter=lfs diff=lfs merge=lfs -text
+*.sqlite filter=lfs diff=lfs merge=lfs -text
+*.csv.gz filter=lfs diff=lfs merge=lfs -text
+*.parquet filter=lfs diff=lfs merge=lfs -text
+*.arrow filter=lfs diff=lfs merge=lfs -text
+
+# GPU kernels and compiled assets
+*.ptx filter=lfs diff=lfs merge=lfs -text
+*.cubin filter=lfs diff=lfs merge=lfs -text
+*.wasm filter=lfs diff=lfs merge=lfs -text
+*.bin filter=lfs diff=lfs merge=lfs -text
+
+# Documentation files
+*.pdf filter=lfs diff=lfs merge=lfs -text
+
+# Binary files - explicitly marked for small files
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.lib binary
+*.a binary
+
+# Documentation images (smaller, keep in Git)
+docs/**/*.png -filter
+docs/**/*.jpg -filter
+docs/**/*.jpeg -filter
+docs/**/*.gif -filter
+README*.png -filter
+README*.jpg -filter
+
+# Language detection overrides
+# ============================
+
+# CUDA files should be detected as C++
+*.cu linguist-language=C++
+*.cuh linguist-language=C++
+
+# Dockerfile variants
+Dockerfile.* linguist-language=Dockerfile
+*.dockerfile linguist-language=Dockerfile
+
+# Configuration files as YAML
+*.yml linguist-language=YAML
+*.yaml linguist-language=YAML
+docker-compose*.yml linguist-language=YAML
+.github/**/*.yml linguist-language=YAML
+
+# Shell scripts
+*.sh linguist-language=Shell
+ops/scripts/* linguist-language=Shell
+
+# Ignore generated files from language statistics
+build/ linguist-generated
+dist/ linguist-generated
+target/ linguist-generated
+node_modules/ linguist-generated
+.venv/ linguist-generated
+__pycache__/ linguist-generated
+*.pyc linguist-generated
+pb/*.go linguist-generated
+*.pb.go linguist-generated
+
+# Mark vendor/third-party code
+edge/vendor/ linguist-vendored
+control/cms/webapp/node_modules/ linguist-vendored
+.venv/ linguist-vendored
+
+# Documentation
+*.md linguist-documentation
+docs/ linguist-documentation
+
+# Export ignore (files not included in archive exports)
+.git* export-ignore
+.dependabot/ export-ignore
+.github/ export-ignore
+.vscode/ export-ignore
+.idea/ export-ignore
+*.log export-ignore
+build/ export-ignore
+target/ export-ignore
+node_modules/ export-ignore
+.venv/ export-ignore

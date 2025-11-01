@@ -1,0 +1,160 @@
+version: 2
+updates:
+  # Python dependencies (Poetry)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "security-team"
+    assignees:
+      - "inscenium-bot"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+    labels:
+      - "dependencies"
+      - "python"
+    ignore:
+      - dependency-name: "torch"
+        versions: ["<2.0"]
+      - dependency-name: "tensorflow"
+        versions: ["<2.12"]
+
+  # Go modules
+  - package-ecosystem: "gomod"
+    directory: "/control/api"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:30"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "backend-team"
+    assignees:
+      - "inscenium-bot"
+    commit-message:
+      prefix: "deps(go)"
+    labels:
+      - "dependencies"
+      - "golang"
+      - "api"
+
+  # Node.js dependencies (CMS)
+  - package-ecosystem: "npm"
+    directory: "/control/cms/webapp"
+    schedule:
+      interval: "weekly" 
+      day: "tuesday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "frontend-team"
+    assignees:
+      - "inscenium-bot"
+    commit-message:
+      prefix: "deps(npm)"
+    labels:
+      - "dependencies"
+      - "nodejs"
+      - "cms"
+    versioning-strategy: "increase"
+
+  # Rust dependencies (Edge)
+  - package-ecosystem: "cargo"
+    directory: "/edge"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:30"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "edge-team"
+    assignees:
+      - "inscenium-bot"
+    commit-message:
+      prefix: "deps(rust)"
+    labels:
+      - "dependencies"
+      - "rust"
+      - "edge"
+
+  # WASM workspace
+  - package-ecosystem: "cargo"
+    directory: "/edge/edge_worker_wasm"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "10:00"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "edge-team"
+    assignees:
+      - "inscenium-bot"
+    commit-message:
+      prefix: "deps(wasm)"
+    labels:
+      - "dependencies"
+      - "rust"
+      - "wasm"
+
+  # Docker base images
+  - package-ecosystem: "docker"
+    directory: "/ops/docker"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "devops-team"
+    assignees:
+      - "inscenium-bot"
+    commit-message:
+      prefix: "deps(docker)"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "security"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:30"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "devops-team"
+    assignees:
+      - "inscenium-bot"
+    commit-message:
+      prefix: "deps(actions)"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "ci"
+
+  # Terraform modules
+  - package-ecosystem: "terraform"
+    directory: "/ops/infra/terraform"
+    schedule:
+      interval: "monthly"
+      day: "first-monday"
+      time: "10:00"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "devops-team"
+      - "security-team"
+    assignees:
+      - "inscenium-bot"
+    commit-message:
+      prefix: "deps(terraform)"
+    labels:
+      - "dependencies"
+      - "terraform"
+      - "infrastructure"
